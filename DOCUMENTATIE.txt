@@ -1,0 +1,37 @@
+problema trateaza pe rand subpunctele a,b,c
+
+punctul a este segmentat in doua subpuncte:
+	
+	-primul subpunct trateaza primalitatea numarului introdus p
+	(etichetele main,prim,error in cazul in care nu este rpim)
+	
+	-al doilea subpunct al punctului a (incepe de la eticheta cont,
+	daca numarul introdus p este prim) testeaza pe rand fiecare candidat generator
+	(incepand cu 2 si terminand cu p-1) pana cand gaseste primul generator;
+	elementele generate de fiecare generator candidat sunt pastrate in
+	vectorul gen de dimensiune curenta ngen, reinitializat de fiecare data 
+	cand se incearca un nou generator
+	(se uitilizeaza etichetele cont, testgen,gogen, check, verelm,parc, nextsrch, addadd;
+	in eticheta printg se afiseaza primul generator descoperit, si in plus
+	vectorului gen i se elimina ultimul element 1 adaugat in timpul generarii)
+
+se sare la punctul b, etichetat pentru inceput cu pctb:
+	
+	-se citeste mesajul in clar, dupa care se parcurge vectorul mesajclar
+	si pentru fiecare litera, este cautata pozitia acesteia in alfabet 
+	(etichetele loopsir, findalfabet) dupa care se obtine pozitia literei de dupa
+	criptare cu ajutorul vectorului gen, si se afiseaza acea litera (cript) si se 
+	reactualizeaza o parte din contori
+
+se sare la punctul c, etichetat pentru inceput cu pctc:
+	
+	-se afiseaza un spatiu pentreu delimitarea punctului b de c la afisare,
+	si se citeste mesajul criptat; pentru fiecare litera din mesajul criptat, se 
+	cauta pozitia acesteia in alfabet (etichetele loopsirrev, findalfabetrev)
+	dupa care se cauta acea positie in vectorul gen, si i se obtine la randul ei 
+	pozitia in gen, dupa care se afiseaza litera din alfabet corespunzatoare
+	ultimei pozitii gasite (etichetele findingen, loopgen, decript) si se reactualizeaza
+	o parte din contori
+
+programul se termina cu instructiunea exit, la care se sare de la punctul c daca p este prim
+sau direct de la eticheta error cand p introdus nu este prim

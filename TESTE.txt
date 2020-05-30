@@ -1,0 +1,41 @@
+--test 1
+
+INPUT:
+
+7 
+ACAD
+BCBG
+
+OUTPUT:
+
+3
+BCBG
+ACAD
+
+
+--test 2
+
+INPUT:
+
+23
+HGJTRUOAA
+BNJHEPKER
+
+OUTPUT:
+
+5
+RILHPMNBB
+AOKTERDEH
+
+
+--test 3
+
+INPUT
+
+15
+ABC
+DEF
+
+OUTPUT
+
+numarul p nu este prim

@@ -1,0 +1,218 @@
+.data
+	p: .space 4
+	notprim: .asciiz "numarul p nu este prim"
+	gen: 
+	.align 1 
+	.space 400
+	ngen: .space 4
+	okgen: .space 4
+	nline: .asciiz "\n"
+	alfabet: .asciiz "ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&" # am completat cu 3 caractere de rezerva pt cazul cand p = 29 
+	mesajclar: .space 400
+	mesajcriptat: .space 400
+.text
+
+main:
+	li $v0,5
+	syscall
+	sw $v0,p
+	move $t0,$v0
+	
+	li $t1,2
+	div $t2,$t0,$t1
+	sub $t2,$t2,1
+
+prim:
+	bgt $t1,$t2,cont
+	rem $t3,$t0,$t1
+	li $t4,0
+	beq $t3,$t4,error
+	addi $t1,$t1,1
+	j prim
+
+error:
+	la $a0,notprim
+	li $v0,4
+	syscall
+	
+	j exit
+
+cont:
+	lw $t0,p
+	li $t1,2 	# generatorii luati pe rand, cel mai mic posibil e 2
+
+testgen:
+	bge $t1,$t0,exit
+	
+	li $t6,1	# initializare dimensiune multime generata de $t1 cu 0
+	sw $t6,ngen 	
+	
+	li $t3,1 	# locul unde se vor retine puterile lui $t1
+	li $t4,0 	# contor de parcurgere al gen din 4 in 4
+	li $t5,1 	# puterea pentru care se vor genera elementele cu baza $t1, initializata cu 1
+	
+	sw $t3,gen($t4)
+	addi $t4,$t4,4
+
+gogen:
+	bge $t5,$t0,check
+	
+	mul $t3,$t3,$t1
+	rem $t3,$t3,$t0
+
+	sw $t3,gen($t4)	 # adaug elementul generat in gen
+	
+	addi $t6,$t6,1	# maresc dimensiunea lui gen, marind ngen cu 1
+	sw $t6,ngen
+
+	li $t2,1	
+	beq $t2,$t3,check
+
+	addi $t5,$t5,1	# pregatesc urmatoarea putere
+	addi $t4,$t4,4	# maresc contorul de parcurs in gen pregatindu l pentru urmatoarul element generat
+	
+	j gogen
+
+check:
+	li $t5,1	 # vom cauta fiecare numar in parte in gen
+	
+verelem:
+	bge $t5,$t0,printg
+	li $t7,0 	# contorul marit din 4 in 4 pentru parcurgerea lui gen
+	li $t4,0 	# contorul i de la 0 la ngen = $t6
+	
+parc:	bge $t4,$t6,addadd
+	
+	lw $t8,gen($t7)
+	
+	beq $t5,$t8,nextsrch
+	
+	addi $t4,$t4,1
+	addi $t7,$t7,4
+
+	j parc
+
+nextsrch:
+	addi $t5,$t5,1
+	j verelem
+	
+addadd: addi $t1,$t1,1
+	j testgen
+
+printg:
+	sw $t1,okgen
+	move $a0,$t1
+	li $v0,1
+	syscall
+	
+	la $a0,nline
+	li $v0,4
+	syscall
+	
+	lw $t6,ngen
+	sub $t6,$t6,1
+	sw $t6,ngen
+
+# punctul b de aici
+
+pctb:
+	la $a0,mesajclar
+	li $a1,399
+	li $v0,8
+	syscall
+	
+	li $t0,0
+	lb $t1,mesajclar($t0)
+
+loopsir:
+	beqz $t1,pctc
+	
+	li $t2,0
+	lb $t3,alfabet($t2)
+
+findalfabet:
+	beqz $t3,pctc # eticheta pctc din cadrul acestei instructiuni nu are sens deoarece se va gasi in totdeauna litera corespunzatoare din alfabet
+	
+	beq $t3,$t1,cript
+	
+	addi $t2,1
+	lb $t3,alfabet($t2)
+	j findalfabet
+
+cript:
+	li $t4,4
+	mul $t5,$t2,$t4 
+	
+	lw $t4,gen($t5) # obtinerea pozitiei noii litere din alfabet in urma criptarii cu ajutorul vectorului gen
+	
+	lb $a0,alfabet($t4) # afisarea  caracterului obtinut in urma criptarii
+	li $v0,11
+	syscall
+
+actualizareloopsir:
+	addi $t0,$t0,1
+	lb $t1,mesajclar($t0)
+	j loopsir	
+
+# de aici incepe punctul c
+
+pctc:
+	la $a0,nline # afisare newline inainte de afisarea de la c
+	li $v0,4
+	syscall
+	
+	la $a0,mesajcriptat
+	li $a1,399
+	li $v0,8
+	syscall
+
+	li $t0,0
+	lb $t1,mesajcriptat($t0)
+
+loopsirrev:
+	beqz $t1,exit
+	
+	li $t2,0
+	lb $t3,alfabet($t2)
+
+findalfabetrev:
+	beqz $t3,exit # eticheta pctc din cadrul acestei instructiuni nu are sens deoarece se va gasi in totdeauna litera corespunzatoare din alfabet
+	
+	beq $t3,$t1,findingen
+	
+	addi $t2,1
+	lb $t3,alfabet($t2)
+	j findalfabetrev
+
+findingen:
+	# trebuie sa gasesc elementul din gen egal cu $t2 si pozitia acestuia
+	li $t4,0
+	li $t5,0
+	lw $t6,ngen
+
+loopgen:
+	bge $t4,$t6,exit # eticheta exit nu are sens deoarece se va gasi cu siguranta elementul in gen
+	
+	lw $t7,gen($t5)
+	beq $t2,$t7,decript
+	
+	addi $t4,$t4,1
+	addi $t5,$t5,4
+	
+	j loopgen
+
+decript:
+	# am in $t4 pozitia din alfabet a literei obtinuta in urma decriptarii
+	lb $a0,alfabet($t4)
+	li $v0,11
+	syscall
+
+actualizareloopsirrev:
+	addi $t0,$t0,1
+	lb $t1,mesajcriptat($t0)
+
+	j loopsirrev	
+
+exit:
+	li $v0,10
+	syscall
